@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gumiho (구미호)
 
-## Getting Started
+A modern, ad-light streaming interface and tracker for **Korean Dramas (K-Dramas)** and **American / Western TV Series**, inspired by Kitsune.
 
-First, run the development server:
+## Features
+
+- **Zero Database / Zero Accounts Required**: 100% client-side savepoints via `localStorage` with cross-tab sync and JSON export/import backups.
+- **Zero API Keys Required**: Completely powered by public live TV endpoints (TVMaze REST API) with zero environment variable setup.
+- **Multiple Free Streaming Servers**: High-availability embed player featuring multi-server fallback (MultiEmbed, VidSrc PM, VidSrc SH, AutoEmbed, 2Embed, and SmashyStream).
+- **Instant AJAX Live Search**: Debounced keystroke search with in-memory caching and thumbnail previews.
+- **Dedicated Category Tabs**: Strictly separated views for **K-Dramas** (`/kdramas`) and **American Series** (`/american`).
+- **Fully Responsive**: Mobile-first touch targets, numeric keypads for timestamp bookmarks, 5-to-12 column responsive episode grids, and a floating Scroll-to-Top button.
+- **Clean Aesthetic**: Inter typography, dark slate theme with rose accents, and pure SVG/Lucide icons with zero emojis.
+
+## Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy to Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Gumiho is built with Next.js App Router and is 100% ready for instant deployment on Vercel:
 
-## Learn More
+### Option 1: Vercel Dashboard (Recommended)
 
-To learn more about Next.js, take a look at the following resources:
+1. Push your repository to GitHub / GitLab / Bitbucket:
+   ```bash
+   git add .
+   git commit -m "feat: complete Gumiho streaming app"
+   git push origin main
+   ```
+2. Go to [vercel.com/new](https://vercel.com/new).
+3. Import your repository.
+4. Leave **Environment Variables blank** (Gumiho requires zero env variables).
+5. Click **Deploy**.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Option 2: Vercel CLI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx vercel
+```
+Follow the CLI prompts to deploy directly from your terminal.

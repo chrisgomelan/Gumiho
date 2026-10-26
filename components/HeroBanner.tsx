@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Play, Star, Info } from "lucide-react";
 import type { SeriesBase } from "@/types/series";
-import { getImageUrl } from "@/lib/tmdb";
+import { getImageUrl } from "@/lib/series-api";
 import { SaveButton } from "./SaveButton";
 
 interface HeroBannerProps {
@@ -14,68 +14,63 @@ export function HeroBanner({ series }: HeroBannerProps) {
     series.original_language === "ko" || series.origin_country?.includes("KR");
 
   return (
-    <div className="relative w-full overflow-hidden rounded-3xl bg-slate-950 shadow-2xl ring-1 ring-white/10">
+    <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-slate-950 shadow-2xl ring-1 ring-white/10">
       {/* Background Backdrop Image */}
-      <div className="relative aspect-[16/9] max-h-[520px] w-full min-h-[380px]">
+      <div className="relative aspect-[16/10] sm:aspect-[16/9] max-h-[520px] w-full min-h-[340px] sm:min-h-[420px]">
         <Image
-          src={getImageUrl(series.backdrop_path, "w1280")}
+          src={getImageUrl(series.backdrop_path)}
           alt={series.name}
           fill
           priority
+          sizes="100vw"
           className="object-cover object-top opacity-75"
         />
 
         {/* Ambient Dark Gradient Overlays for high readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c14] via-[#0b0c14]/60 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0c14] via-[#0b0c14]/80 to-transparent sm:w-2/3" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0b0c14] via-[#0b0c14]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0b0c14] via-[#0b0c14]/80 to-transparent sm:w-3/4" />
       </div>
 
       {/* Content overlay */}
-      <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:w-3/5">
-        <div className="flex flex-wrap items-center gap-2 mb-2.5">
+      <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-8 md:p-10 md:w-3/5">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
           {isKorean ? (
-            <span className="rounded-md bg-rose-600 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white shadow-md">
+            <span className="rounded-md bg-rose-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md">
               Featured K-Drama
             </span>
           ) : (
-            <span className="rounded-md bg-blue-600 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white shadow-md">
+            <span className="rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md">
               Featured Series
             </span>
           )}
 
           {series.vote_average > 0 && (
-            <div className="flex items-center gap-1 rounded-md bg-black/60 px-2.5 py-0.5 text-xs font-bold text-amber-300 ring-1 ring-white/10 backdrop-blur-md">
-              <Star className="size-3.5 fill-amber-400 text-amber-400" />
-              <span>{series.vote_average.toFixed(1)} Rating</span>
+            <div className="flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5 text-[11px] font-bold text-amber-300 ring-1 ring-white/10 backdrop-blur-md">
+              <Star className="size-3 fill-amber-400 text-amber-400" />
+              <span>{series.vote_average.toFixed(1)}</span>
             </div>
           )}
 
           {series.first_air_date && (
-            <span className="text-xs text-white/60">
+            <span className="text-[11px] text-white/60">
               {new Date(series.first_air_date).getFullYear()}
             </span>
           )}
         </div>
 
-        <h1 className="text-2xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl drop-shadow-md">
+        <h1 className="text-xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl drop-shadow-md">
           {series.name}
         </h1>
 
-        {series.original_name && series.original_name !== series.name && (
-          <p className="text-sm font-semibold text-rose-300/80 mt-0.5">
-            {series.original_name}
-          </p>
-        )}
-
-        <p className="mt-3 line-clamp-3 text-xs text-white/70 sm:text-sm max-w-xl leading-relaxed">
+        <p className="mt-2 line-clamp-2 sm:line-clamp-3 text-xs text-white/70 sm:text-sm max-w-xl leading-relaxed">
           {series.overview}
         </p>
 
         {/* Action Buttons */}
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-2.5 sm:gap-3">
           <Link
             href={`/series/${series.id}`}
-            className="flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-rose-950/50 transition hover:bg-rose-500 hover:scale-105 active:scale-95"
+            className="flex h-10 sm:h-11 items-center gap-2 rounded-xl bg-rose-600 px-4 sm:px-5 text-xs sm:text-sm font-bold text-white shadow-lg shadow-rose-950/50 transition hover:bg-rose-500 active:scale-95"
           >
             <Play className="size-4 fill-white" />
             <span>Watch Now</span>
@@ -83,7 +78,7 @@ export function HeroBanner({ series }: HeroBannerProps) {
 
           <Link
             href={`/series/${series.id}`}
-            className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-md ring-1 ring-white/15 transition hover:bg-white/20 active:scale-95"
+            className="flex h-10 sm:h-11 items-center gap-2 rounded-xl bg-white/10 px-3.5 sm:px-4 text-xs sm:text-sm font-semibold text-white backdrop-blur-md ring-1 ring-white/15 transition hover:bg-white/20 active:scale-95"
           >
             <Info className="size-4" />
             <span>Details</span>
@@ -92,11 +87,11 @@ export function HeroBanner({ series }: HeroBannerProps) {
           <SaveButton
             tmdb_id={series.id}
             title={series.name}
-            poster={getImageUrl(series.poster_path, "w500")}
-            backdrop={getImageUrl(series.backdrop_path, "w1280")}
+            poster={getImageUrl(series.poster_path)}
+            backdrop={getImageUrl(series.backdrop_path)}
             totalSeasons={series.number_of_seasons || 1}
             origin_country={series.origin_country}
-            className="size-10"
+            className="size-10 sm:size-11"
           />
         </div>
       </div>

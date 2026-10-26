@@ -1,56 +1,44 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
-import { Bookmark, Flame, Menu, Search, Sparkles, Tv, X } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Bookmark, Film, Home, Menu, Search, Tv, X } from "lucide-react";
+import { GumihoLogo } from "@/components/Icons";
+import LiveSearch from "@/components/LiveSearch";
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setMobileMenuOpen(false);
-    }
-  };
+  // Close mobile overlays when route changes
+  useEffect(() => {
+    setIsSearchOpen(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
 
   const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/search?region=ko", label: "K-Dramas" },
-    { href: "/search?region=en", label: "American Series" },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/kdramas", label: "K-Dramas", icon: Tv },
+    { href: "/american", label: "American Series", icon: Film },
     { href: "/library", label: "My Library", icon: Bookmark },
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#0b0c14]/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        {/* Brand / Logo */}
-        <Link href="/" className="group flex items-center gap-2.5">
-          <div className="relative flex size-9 items-center justify-center rounded-xl bg-gradient-to-tr from-rose-600 via-pink-600 to-amber-500 shadow-lg shadow-rose-950/40 ring-1 ring-white/20 transition-transform group-hover:scale-105">
-            <Flame className="size-5 text-white" />
-          </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1">
-              <span className="text-lg font-black tracking-wider text-white">
-                GUMIHO
-              </span>
-              <span className="rounded bg-rose-500/20 px-1 py-0.2 text-[9px] font-bold tracking-tight text-rose-300">
-                구미호
-              </span>
-            </div>
-            <span className="text-[10px] font-semibold text-rose-400/80 -mt-0.5">
-              Series & K-Dramas
-            </span>
-          </div>
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0b0c14]/90 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3.5 py-2.5 sm:px-6 sm:py-3">
+        {/* Brand */}
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 text-lg font-bold tracking-tight text-white transition hover:text-rose-400 sm:text-xl shrink-0"
+        >
+          <GumihoLogo className="size-6 text-rose-500" />
+          <span>Gumiho</span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden items-center gap-1 md:flex">
+        {/* Navigation Links with Icons */}
+        <nav className="hidden items-center gap-1 sm:gap-1.5 md:flex">
           {navLinks.map((link) => {
             const isActive =
               link.href === "/"
@@ -60,86 +48,94 @@ export function Navbar() {
                     ? typeof window !== "undefined" && window.location.href.includes(link.href.split("?")[1])
                     : true);
 
+            const Icon = link.icon;
+
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-xs font-semibold transition ${
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition sm:text-sm ${
                   isActive
-                    ? "bg-rose-600/20 text-rose-300 ring-1 ring-rose-500/30"
-                    : "text-white/70 hover:bg-white/[0.06] hover:text-white"
+                    ? "bg-white/15 text-white font-semibold ring-1 ring-white/20 shadow-sm"
+                    : "text-white/70 hover:bg-white/[0.08] hover:text-white"
                 }`}
               >
-                {link.icon && <link.icon className="size-3.5" />}
+                <Icon className="size-3.5 shrink-0" />
                 <span>{link.label}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Search Bar & Mobile Menu Toggle */}
-        <div className="flex items-center gap-2.5">
-          {/* Quick Search Form */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="relative hidden sm:block w-48 lg:w-64"
-          >
-            <input
-              type="text"
-              placeholder="Search series or K-drama..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 w-full rounded-xl bg-white/[0.07] pl-8 pr-3 text-xs text-white placeholder-white/40 ring-1 ring-white/10 transition focus:bg-white/[0.1] focus:outline-none focus:ring-1 focus:ring-rose-500"
-            />
-            <Search className="pointer-events-none absolute left-2.5 top-2.5 size-4 text-white/40" />
-          </form>
+        {/* Desktop AJAX Live Search */}
+        <div className="hidden md:block">
+          <LiveSearch variant="desktop" />
+        </div>
 
-          {/* Mobile search button */}
-          <Link
-            href="/search"
-            aria-label="Search"
-            className="flex size-9 items-center justify-center rounded-xl bg-white/[0.06] text-white/70 sm:hidden"
-          >
-            <Search className="size-4" />
-          </Link>
-
-          {/* Mobile Menu Toggle Button */}
+        {/* Mobile Action Buttons */}
+        <div className="flex items-center gap-1.5 md:hidden">
+          {/* Mobile Search Toggle */}
           <button
-            onClick={() => setMobileMenuOpen((p) => !p)}
+            type="button"
+            onClick={() => {
+              setIsSearchOpen((prev) => !prev);
+              setMobileMenuOpen(false);
+            }}
+            aria-expanded={isSearchOpen}
+            aria-label={isSearchOpen ? "Close search bar" : "Open search bar"}
+            className={`flex size-9 items-center justify-center rounded-xl text-sm font-semibold transition active:scale-95 ${
+              isSearchOpen
+                ? "bg-rose-600 text-white ring-1 ring-rose-400"
+                : "bg-white/10 text-white/80 hover:bg-white/15"
+            }`}
+          >
+            {isSearchOpen ? <X className="size-4" /> : <Search className="size-4" />}
+          </button>
+
+          {/* Mobile Navigation Drawer Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              setMobileMenuOpen((prev) => !prev);
+              setIsSearchOpen(false);
+            }}
             aria-label="Toggle navigation menu"
-            className="flex size-9 items-center justify-center rounded-xl bg-white/[0.06] text-white/70 md:hidden"
+            className="flex size-9 items-center justify-center rounded-xl bg-white/10 text-white/80 hover:bg-white/15"
           >
             {mobileMenuOpen ? <X className="size-4" /> : <Menu className="size-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Expandable Live Search */}
+      {isSearchOpen && (
+        <div className="border-t border-white/5 bg-[#0b0c14]/95 px-3.5 py-2.5 md:hidden">
+          <LiveSearch
+            variant="mobile"
+            autoFocus
+            onSelect={() => setIsSearchOpen(false)}
+          />
+        </div>
+      )}
+
+      {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
         <div className="border-t border-white/[0.08] bg-[#0b0c14]/95 px-4 py-3 md:hidden">
-          <form onSubmit={handleSearchSubmit} className="relative mb-3 w-full">
-            <input
-              type="text"
-              placeholder="Search series..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-10 w-full rounded-xl bg-white/10 pl-9 pr-3 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-rose-500"
-            />
-            <Search className="pointer-events-none absolute left-3 top-3 size-4 text-white/40" />
-          </form>
-
           <div className="flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10"
-              >
-                {link.icon && <link.icon className="size-4 text-rose-400" />}
-                <span>{link.label}</span>
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-white/80 hover:bg-white/10"
+                >
+                  <Icon className="size-4 text-rose-400" />
+                  <span>{link.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Star, Calendar, Tv, ArrowLeft } from "lucide-react";
-import { fetchSeriesDetails, getImageUrl } from "@/lib/tmdb";
+import { fetchSeriesDetails, getImageUrl } from "@/lib/series-api";
 import { WatchPlayer } from "@/components/WatchPlayer";
 import { SaveButton } from "@/components/SaveButton";
 import { SeriesCard } from "@/components/SeriesCard";
@@ -36,7 +36,7 @@ export default async function SeriesDetailPage({
     series.original_language === "ko" || series.origin_country?.includes("KR");
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8 px-3.5 py-4 sm:px-6 sm:py-6">
       {/* Back to Home Button */}
       <div className="flex items-center justify-between">
         <Link
@@ -49,12 +49,13 @@ export default async function SeriesDetailPage({
       </div>
 
       {/* Main Video Player Section */}
-      <section className="rounded-3xl bg-slate-900/60 p-3 sm:p-5 ring-1 ring-white/10 backdrop-blur-xl">
+      <section className="rounded-2xl sm:rounded-3xl bg-slate-900/60 p-2 sm:p-5 ring-1 ring-white/10 backdrop-blur-xl">
         <WatchPlayer
-          tmdb_id={series.id}
+          series_id={series.id}
+          imdb_id={series.imdb_id}
           title={series.name}
-          poster={getImageUrl(series.poster_path, "w500")}
-          backdrop={getImageUrl(series.backdrop_path, "w1280")}
+          poster={getImageUrl(series.poster_path)}
+          backdrop={getImageUrl(series.backdrop_path)}
           totalSeasons={series.number_of_seasons}
           initialSeason={initialSeason}
           initialEpisode={initialEpisode}
@@ -67,20 +68,21 @@ export default async function SeriesDetailPage({
       </section>
 
       {/* Series Details Grid */}
-      <section className="grid grid-cols-1 gap-8 md:grid-cols-4">
-        {/* Left Poster Card */}
-        <div className="relative aspect-[2/3] w-full max-w-[260px] overflow-hidden rounded-2xl bg-slate-800 ring-1 ring-white/10 shadow-2xl mx-auto md:mx-0">
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-4">
+        {/* Poster Card */}
+        <div className="relative aspect-[2/3] w-full max-w-[180px] sm:max-w-[220px] md:max-w-none overflow-hidden rounded-2xl bg-slate-800 ring-1 ring-white/10 shadow-2xl mx-auto md:mx-0">
           <Image
-            src={getImageUrl(series.poster_path, "w500")}
+            src={getImageUrl(series.poster_path)}
             alt={series.name}
             fill
+            sizes="(max-width: 768px) 180px, 260px"
             className="object-cover"
           />
         </div>
 
         {/* Right Info Details */}
-        <div className="space-y-4 md:col-span-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-3.5 sm:space-y-4 md:col-span-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1.5">
                 {isKorean ? (
@@ -99,13 +101,13 @@ export default async function SeriesDetailPage({
                 )}
               </div>
 
-              <h1 className="text-2xl font-black text-white sm:text-3xl">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white">
                 {series.name}
               </h1>
 
-              {series.original_name && series.original_name !== series.name && (
-                <p className="text-sm font-semibold text-rose-400">
-                  {series.original_name}
+              {series.network && (
+                <p className="text-xs font-semibold text-rose-400 mt-0.5">
+                  Network: {series.network}
                 </p>
               )}
             </div>
@@ -113,16 +115,16 @@ export default async function SeriesDetailPage({
             <SaveButton
               tmdb_id={series.id}
               title={series.name}
-              poster={getImageUrl(series.poster_path, "w500")}
-              backdrop={getImageUrl(series.backdrop_path, "w1280")}
+              poster={getImageUrl(series.poster_path)}
+              backdrop={getImageUrl(series.backdrop_path)}
               totalSeasons={series.number_of_seasons}
               origin_country={series.origin_country}
-              className="size-11"
+              className="size-10 sm:size-11"
             />
           </div>
 
           {/* Quick Stats: Rating, Seasons, Air Date */}
-          <div className="flex flex-wrap items-center gap-4 text-xs text-white/60">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-white/60">
             {series.vote_average > 0 && (
               <div className="flex items-center gap-1 font-bold text-amber-300">
                 <Star className="size-3.5 fill-amber-400 text-amber-400" />
@@ -138,7 +140,7 @@ export default async function SeriesDetailPage({
             {series.first_air_date && (
               <div className="flex items-center gap-1">
                 <Calendar className="size-3.5 text-blue-400" />
-                <span>Premiered {new Date(series.first_air_date).getFullYear()}</span>
+                <span>{new Date(series.first_air_date).getFullYear()}</span>
               </div>
             )}
           </div>
@@ -148,17 +150,17 @@ export default async function SeriesDetailPage({
             <div className="flex flex-wrap gap-1.5">
               {series.genres.map((g) => (
                 <span
-                  key={g.id}
+                  key={typeof g === "string" ? g : (g as any).name}
                   className="rounded-lg bg-white/[0.06] px-2.5 py-1 text-xs font-medium text-white/80 ring-1 ring-white/10"
                 >
-                  {g.name}
+                  {typeof g === "string" ? g : (g as any).name}
                 </span>
               ))}
             </div>
           )}
 
           {/* Synopsis */}
-          <p className="text-sm leading-relaxed text-white/80">
+          <p className="text-xs sm:text-sm leading-relaxed text-white/80">
             {series.overview || "No overview available for this series."}
           </p>
 
@@ -168,15 +170,15 @@ export default async function SeriesDetailPage({
               <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-2">
                 Starring Cast
               </h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {series.cast.map((actor) => (
                   <div
                     key={actor.id}
-                    className="rounded-xl bg-white/[0.04] px-3 py-1.5 ring-1 ring-white/10 text-xs"
+                    className="rounded-xl bg-white/[0.04] px-2.5 py-1 sm:px-3 sm:py-1.5 ring-1 ring-white/10 text-xs"
                   >
                     <span className="font-semibold text-white">{actor.name}</span>
                     {actor.character && (
-                      <span className="text-white/40 ml-1.5">as {actor.character}</span>
+                      <span className="text-white/40 ml-1.5 hidden sm:inline">as {actor.character}</span>
                     )}
                   </div>
                 ))}
@@ -190,7 +192,7 @@ export default async function SeriesDetailPage({
       {series.similar && series.similar.length > 0 && (
         <section className="space-y-4 pt-6 border-t border-white/[0.08]">
           <h2 className="text-lg font-black text-white">Recommended If You Like This</h2>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+          <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {series.similar.slice(0, 6).map((item) => (
               <SeriesCard key={item.id} series={item} />
             ))}
