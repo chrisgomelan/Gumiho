@@ -7,15 +7,16 @@ function stripHtml(html?: string | null): string {
   return html.replace(/<[^>]*>?/gm, "").trim();
 }
 
-export function getImageUrl(path: string | null | undefined): string {
+export function getImageUrl(path: string | null | undefined, _size?: string): string {
   if (!path) {
     return "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&auto=format&fit=crop&q=80";
   }
   return path;
 }
 
-function mapTvMazeShowToBase(show: any): SeriesBase {
+function mapTvMazeShowToBase(show: any, forcedRegion?: "ko" | "en"): SeriesBase {
   const isKorean =
+    forcedRegion === "ko" ||
     show.language?.toLowerCase() === "korean" ||
     show.network?.country?.code === "KR";
 
@@ -35,7 +36,7 @@ function mapTvMazeShowToBase(show: any): SeriesBase {
   };
 }
 
-async function fetchTvMazeShowByName(name: string): Promise<SeriesBase | null> {
+async function fetchTvMazeShowByName(name: string, forcedRegion?: "ko" | "en"): Promise<SeriesBase | null> {
   try {
     const res = await fetch(
       `${TVMAZE_BASE}/singlesearch/shows?q=${encodeURIComponent(name)}`,
@@ -43,14 +44,14 @@ async function fetchTvMazeShowByName(name: string): Promise<SeriesBase | null> {
     );
     if (!res.ok) return null;
     const data = await res.json();
-    return mapTvMazeShowToBase(data);
+    return mapTvMazeShowToBase(data, forcedRegion);
   } catch {
     return null;
   }
 }
 
 // ---------------------------------------------------------------------------
-// Curated Live Feed via Free TVMaze API (Zero Env / Zero Keys Required)
+// Verified Korean Dramas Only (K-Dramas)
 // ---------------------------------------------------------------------------
 
 const POPULAR_KDRAMAS = [
@@ -66,7 +67,23 @@ const POPULAR_KDRAMAS = [
   "Hospital Playlist",
   "Itaewon Class",
   "Goblin",
+  "Hotel Del Luna",
+  "Extraordinary Attorney Woo",
+  "My Demon",
+  "Marry My Husband",
+  "Signal",
+  "Kingdom",
+  "Twenty-Five Twenty-One",
+  "Business Proposal",
+  "Alchemy of Souls",
+  "A Shop for Killers",
+  "Strong Girl Bong-soon",
+  "Weightlifting Fairy Kim Bok-Joo",
 ];
+
+// ---------------------------------------------------------------------------
+// Verified American & Western Series Only
+// ---------------------------------------------------------------------------
 
 const POPULAR_WESTERN = [
   "Stranger Things",
@@ -81,20 +98,32 @@ const POPULAR_WESTERN = [
   "Wednesday",
   "Game of Thrones",
   "Loki",
+  "Better Call Saul",
+  "Succession",
+  "True Detective",
+  "Fargo",
+  "The White Lotus",
+  "Chernobyl",
+  "Peaky Blinders",
+  "Yellowstone",
+  "Arcane",
+  "Dark",
+  "Mindhunter",
+  "Andor",
 ];
 
 export async function fetchTrendingKDramas(): Promise<SeriesBase[]> {
   const results = await Promise.all(
-    POPULAR_KDRAMAS.map((title) => fetchTvMazeShowByName(title))
+    POPULAR_KDRAMAS.map((title) => fetchTvMazeShowByName(title, "ko"))
   );
-  return results.filter((item): item is SeriesBase => item !== null);
+  return results.filter((item): item is SeriesBase => item !== null && item.original_language === "ko");
 }
 
 export async function fetchTrendingWestern(): Promise<SeriesBase[]> {
   const results = await Promise.all(
-    POPULAR_WESTERN.map((title) => fetchTvMazeShowByName(title))
+    POPULAR_WESTERN.map((title) => fetchTvMazeShowByName(title, "en"))
   );
-  return results.filter((item): item is SeriesBase => item !== null);
+  return results.filter((item): item is SeriesBase => item !== null && item.original_language === "en");
 }
 
 export async function fetchTopRatedGlobal(): Promise<SeriesBase[]> {
@@ -148,7 +177,6 @@ export async function fetchSeriesDetails(id: number): Promise<SeriesFull | null>
     const rawEpisodes: any[] = data._embedded?.episodes || [];
     const rawCast: any[] = data._embedded?.cast || [];
 
-    // Group episodes by season
     const seasons: Season[] = rawSeasons.map((s) => {
       const seasonEps = rawEpisodes
         .filter((ep) => ep.season === s.number)
@@ -175,7 +203,6 @@ export async function fetchSeriesDetails(id: number): Promise<SeriesFull | null>
       };
     });
 
-    // Fallback if seasons array was empty in TVMaze
     if (seasons.length === 0 && rawEpisodes.length > 0) {
       const seasonNumbers = Array.from(
         new Set(rawEpisodes.map((ep) => ep.season))

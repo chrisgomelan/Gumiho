@@ -20,19 +20,11 @@ export interface VideoServer {
   getUrl: (id: number, imdbId: string | null | undefined, season: number, episode: number) => string;
 }
 
+// Only verified, actively responding and accessible free embed streaming servers
 export const VIDEO_SERVERS: VideoServer[] = [
   {
-    id: "autoembed",
-    name: "AutoEmbed (Multi-Source)",
-    badge: "Fast",
-    getUrl: (id, imdbId, s, ep) => {
-      const mediaId = imdbId || id;
-      return `https://player.autoembed.cc/embed/tv/${mediaId}/${s}/${ep}`;
-    },
-  },
-  {
     id: "multiembed",
-    name: "MultiEmbed / SuperEmbed",
+    name: "MultiEmbed Stream",
     badge: "Recommended",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
@@ -40,48 +32,30 @@ export const VIDEO_SERVERS: VideoServer[] = [
     },
   },
   {
-    id: "vidlink",
-    name: "VidLink (HD / Multi-Sub)",
-    badge: "High Quality",
+    id: "vidsrc-pm",
+    name: "VidSrc Stream (HD)",
+    badge: "Fast CDN",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
-      return `https://vidlink.pro/tv/${mediaId}/${s}/${ep}?fallback=true&primaryColor=e11d48&secondaryColor=f43f5e`;
+      return `https://vidsrc.pm/embed/tv/${mediaId}/${s}/${ep}`;
     },
   },
   {
-    id: "embedsu",
-    name: "Embed.su (CDN Stream)",
-    badge: "HD",
+    id: "vidsrc-sh",
+    name: "VidSrc Alternative",
+    badge: "Sub & Dub",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
-      return `https://embed.su/embed/tv/${mediaId}/${s}/${ep}`;
+      return `https://vidsrc.sh/embed/tv?imdb=${mediaId}&season=${s}&episode=${ep}`;
     },
   },
   {
-    id: "videasy",
-    name: "Videasy (Clean Player)",
-    badge: "Minimal Ads",
+    id: "autoembed-me",
+    name: "AutoEmbed Stream",
+    badge: "Active",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
-      return `https://player.videasy.to/tv/${mediaId}/${s}/${ep}`;
-    },
-  },
-  {
-    id: "vidsrc-cc",
-    name: "VidSrc CC (Global)",
-    badge: "Global",
-    getUrl: (id, imdbId, s, ep) => {
-      const mediaId = imdbId || id;
-      return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${s}/${ep}`;
-    },
-  },
-  {
-    id: "vidsrc-me",
-    name: "VidSrc Stream",
-    badge: "Alternative",
-    getUrl: (id, imdbId, s, ep) => {
-      const mediaId = imdbId || id;
-      return `https://vidsrc.me/embed/tv?imdb=${mediaId}&season=${s}&episode=${ep}`;
+      return `https://autoembed.me/tv/imdb/${mediaId}-${s}-${ep}`;
     },
   },
   {
@@ -95,8 +69,8 @@ export const VIDEO_SERVERS: VideoServer[] = [
   },
   {
     id: "smashystream",
-    name: "SmashyStream",
-    badge: "Alternative",
+    name: "Smashy Player",
+    badge: "Multi-Source",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
       return `https://player.smashystream.com/tv/${mediaId}/${s}/${ep}`;
@@ -213,27 +187,27 @@ export function WatchPlayer({
   );
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-3.5 sm:gap-4">
       {/* Top Controls: Server Selector & Quick Info */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           {/* Server Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setServerDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2 rounded-xl bg-white/[0.08] px-3.5 py-2 text-xs font-semibold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-white/[0.12] active:scale-95"
+              className="flex h-10 sm:h-9 items-center gap-2 rounded-xl bg-white/[0.08] px-3 text-xs font-semibold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-white/[0.12] active:scale-95"
             >
-              <Server className="size-3.5 text-rose-400" />
-              <span>{activeServer.name}</span>
+              <Server className="size-3.5 text-rose-400 shrink-0" />
+              <span className="truncate max-w-[130px] sm:max-w-none">{activeServer.name}</span>
               <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] font-bold text-rose-300">
                 {activeServer.badge}
               </span>
-              <ChevronDown className="size-3.5 opacity-60" />
+              <ChevronDown className="size-3.5 opacity-60 shrink-0" />
             </button>
 
             {serverDropdownOpen && (
               <div
-                className="absolute left-0 top-full z-50 mt-1.5 w-72 rounded-xl bg-slate-900/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-white/15"
+                className="absolute left-0 top-full z-50 mt-1.5 w-72 max-w-[calc(100vw-32px)] rounded-xl bg-slate-900/95 p-1.5 shadow-2xl backdrop-blur-xl ring-1 ring-white/15"
                 onMouseLeave={() => setServerDropdownOpen(false)}
               >
                 <div className="px-2.5 py-1.5 text-[11px] font-semibold text-white/50">
@@ -249,14 +223,14 @@ export function WatchPlayer({
                           setActiveServer(srv);
                           setServerDropdownOpen(false);
                         }}
-                        className={`flex items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition ${
+                        className={`flex items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs transition active:scale-95 ${
                           isCurrent
                             ? "bg-rose-600/30 text-rose-300 font-semibold ring-1 ring-rose-500/40"
                             : "text-white/80 hover:bg-white/10"
                         }`}
                       >
                         <span className="truncate">{srv.name}</span>
-                        <span className="shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/60">
+                        <span className="shrink-0 rounded bg-white/10 px-1.5 py-0.5 text-[10px] text-white/60 ml-1.5">
                           {srv.badge}
                         </span>
                       </button>
@@ -273,7 +247,7 @@ export function WatchPlayer({
           href={playerUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-1.5 rounded-xl bg-white/[0.06] px-3 py-2 text-xs font-medium text-white/70 transition hover:bg-white/[0.1] hover:text-white"
+          className="flex h-10 sm:h-9 items-center gap-1.5 rounded-xl bg-white/[0.06] px-3 text-xs font-medium text-white/70 transition hover:bg-white/[0.1] hover:text-white active:scale-95 shrink-0"
         >
           <span>Open in Tab</span>
           <ExternalLink className="size-3.5" />
@@ -281,7 +255,7 @@ export function WatchPlayer({
       </div>
 
       {/* Responsive Video Player Iframe */}
-      <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow-2xl ring-1 ring-white/10">
+      <div className="relative aspect-video w-full overflow-hidden rounded-xl sm:rounded-2xl bg-black shadow-2xl ring-1 ring-white/10">
         <iframe
           key={`${activeServer.id}-s${selectedSeason}-e${selectedEpisode}`}
           src={playerUrl}
@@ -292,20 +266,21 @@ export function WatchPlayer({
         />
       </div>
 
-      {/* Episode Navigation Bar */}
+      {/* Mobile-friendly Quick Prev / Next Episode Bar */}
       <div className="flex items-center justify-between gap-2 rounded-xl bg-white/[0.04] p-2 ring-1 ring-white/10 sm:p-2.5">
         <button
           onClick={() => handleSelectEpisode(selectedEpisode - 1)}
           disabled={selectedEpisode <= 1}
+          aria-label="Previous episode"
           className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-white/10 px-3 text-xs font-bold text-white transition hover:bg-white/20 active:scale-95 disabled:pointer-events-none disabled:opacity-30 sm:flex-initial sm:px-4"
         >
           <ChevronLeft className="size-4" />
           <span>Prev Ep</span>
         </button>
 
-        <div className="text-center text-xs font-medium text-white/80">
+        <div className="text-center text-xs font-medium text-white/80 px-1">
           <span className="font-bold text-white">
-            Season {selectedSeason} • Ep {selectedEpisode}
+            S{selectedSeason} • Ep {selectedEpisode}
           </span>
           <span className="text-white/40"> / {totalEpisodesInSeason}</span>
         </div>
@@ -313,6 +288,7 @@ export function WatchPlayer({
         <button
           onClick={() => handleSelectEpisode(selectedEpisode + 1)}
           disabled={selectedEpisode >= totalEpisodesInSeason}
+          aria-label="Next episode"
           className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-rose-600 px-3 text-xs font-bold text-white transition hover:bg-rose-500 active:scale-95 disabled:pointer-events-none disabled:opacity-30 sm:flex-initial sm:px-4"
         >
           <span>Next Ep</span>
@@ -321,45 +297,49 @@ export function WatchPlayer({
       </div>
 
       {/* Troubleshooting Tips */}
-      <div className="flex items-start gap-2.5 rounded-xl bg-amber-500/10 px-3.5 py-2.5 text-xs text-amber-200/90 ring-1 ring-amber-500/20">
-        <Info className="size-4 shrink-0 text-amber-400 mt-0.5" />
+      <div className="flex items-start gap-2 rounded-xl bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200/90 ring-1 ring-amber-500/20">
+        <Info className="size-3.5 shrink-0 text-amber-400 mt-0.5" />
         <span>
-          <strong>Streaming Tip:</strong> If the video does not load or buffers, switch to another server (e.g. <strong>MultiEmbed</strong> or <strong>VidLink</strong>) using the server button above.
+          <strong>Streaming Tip:</strong> If video won&apos;t load or buffers, tap the server button above or tap <strong>Open in Tab</strong>. On mobile, disable adblocker if playback is blocked.
         </span>
       </div>
 
-      {/* Timestamp / Bookmarking Bar */}
-      <div className="flex flex-col gap-3 rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+      {/* Timestamp / Bookmarking Bar (Mobile Adaptive) */}
+      <div className="flex flex-col gap-3 rounded-xl bg-white/[0.04] p-3 ring-1 ring-white/10 sm:flex-row sm:items-center sm:justify-between sm:p-3.5">
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-1.5 text-xs font-medium text-white/70">
             <Bookmark className="size-3.5 text-rose-400" />
-            <span>Save Timestamp:</span>
+            <span>Bookmark:</span>
           </div>
 
           <div className="flex items-center gap-1">
             <input
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               min={0}
               placeholder="Min"
               value={minutesInput}
               onChange={(e) => setMinutesInput(e.target.value)}
-              className="h-8 w-14 rounded-lg bg-white/10 px-2 text-center text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-400"
+              className="h-9 sm:h-8 w-14 rounded-lg bg-white/10 px-2 text-center text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-400"
             />
             <span className="text-white/40 font-bold">:</span>
             <input
               type="number"
+              inputMode="numeric"
+              pattern="[0-9]*"
               min={0}
               max={59}
               placeholder="Sec"
               value={secondsInput}
               onChange={(e) => setSecondsInput(e.target.value)}
-              className="h-8 w-14 rounded-lg bg-white/10 px-2 text-center text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-400"
+              className="h-9 sm:h-8 w-14 rounded-lg bg-white/10 px-2 text-center text-xs text-white focus:outline-none focus:ring-1 focus:ring-rose-400"
             />
           </div>
 
           <button
             onClick={handleSaveTimestamp}
-            className="h-8 rounded-lg bg-rose-600 px-3 text-xs font-semibold text-white shadow transition hover:bg-rose-500 active:scale-95"
+            className="h-9 sm:h-8 flex-1 sm:flex-initial rounded-lg bg-rose-600 px-3.5 text-xs font-semibold text-white shadow transition hover:bg-rose-500 active:scale-95"
           >
             Save Checkpoint
           </button>
@@ -377,8 +357,8 @@ export function WatchPlayer({
 
       {/* Season Tabs Selector */}
       {seasons.length > 1 && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-white/60 pr-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
+          <div className="flex items-center gap-1 text-xs font-bold text-white/60 pr-1.5 shrink-0">
             <Tv className="size-3.5 text-rose-400" />
             <span>Seasons:</span>
           </div>
@@ -392,7 +372,7 @@ export function WatchPlayer({
                   setSelectedEpisode(1);
                   handleSelectEpisode(1, s.season_number);
                 }}
-                className={`h-8 rounded-lg px-3 text-xs font-medium whitespace-nowrap transition-all ${
+                className={`h-8 rounded-lg px-3 text-xs font-medium whitespace-nowrap transition-all active:scale-95 ${
                   isSelected
                     ? "bg-rose-600 text-white shadow-md ring-1 ring-rose-400"
                     : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
@@ -406,7 +386,7 @@ export function WatchPlayer({
       )}
 
       {/* Episode Selection Grid */}
-      <div className="space-y-3 pt-2">
+      <div className="space-y-2.5 pt-1">
         <div className="flex items-center justify-between text-xs font-semibold text-white/70">
           <span>Episodes (Season {selectedSeason})</span>
 
@@ -414,16 +394,18 @@ export function WatchPlayer({
             <form onSubmit={handleJumpToEpisode} className="flex items-center gap-1.5">
               <input
                 type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 min={1}
                 max={totalEpisodesInSeason}
                 placeholder="Ep #"
                 value={jumpInput}
                 onChange={(e) => setJumpInput(e.target.value)}
-                className="h-7 w-16 rounded-lg bg-white/10 px-2 text-center text-xs text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-rose-400"
+                className="h-8 w-16 rounded-lg bg-white/10 px-2 text-center text-xs text-white placeholder-white/40 focus:outline-none focus:ring-1 focus:ring-rose-400"
               />
               <button
                 type="submit"
-                className="h-7 rounded-lg bg-white/10 px-2.5 text-[11px] font-medium text-white hover:bg-white/20 active:scale-95 transition"
+                className="h-8 rounded-lg bg-white/10 px-2.5 text-[11px] font-medium text-white hover:bg-white/20 active:scale-95 transition"
               >
                 Go
               </button>
@@ -431,7 +413,8 @@ export function WatchPlayer({
           )}
         </div>
 
-        <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 max-h-56 overflow-y-auto pr-1">
+        {/* Responsive grid: 5 columns on phones, scaling up to 12 on large screens */}
+        <div className="grid grid-cols-5 gap-1.5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 max-h-56 overflow-y-auto pr-1">
           {Array.from({ length: totalEpisodesInSeason }, (_, idx) => idx + 1).map((epNum) => {
             const isActive = epNum === selectedEpisode;
             return (

@@ -13,11 +13,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "image.tmdb.org",
+        hostname: "**.tvmaze.com",
       },
       {
         protocol: "https",
-        hostname: "static.tvmaze.com",
+        hostname: "image.tmdb.org",
       },
       {
         protocol: "https",

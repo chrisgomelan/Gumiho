@@ -18,7 +18,7 @@ export default async function HomePage() {
   const featured = kdramas[0] || western[0];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-7xl space-y-7 sm:space-y-10 px-3.5 py-3.5 sm:px-6 sm:py-8">
       {/* Premier Featured Hero */}
       {featured && <HeroBanner series={featured} />}
 
@@ -29,7 +29,7 @@ export default async function HomePage() {
       <HomeSection
         title="Trending K-Dramas"
         subtitle="The hottest romantic, thriller, and fantasy series from South Korea"
-        viewAllHref="/search?region=ko"
+        viewAllHref="/kdramas"
         icon={<Flame className="size-5 text-rose-500" />}
         items={kdramas}
       />
@@ -38,7 +38,7 @@ export default async function HomePage() {
       <HomeSection
         title="Popular American & Western Series"
         subtitle="Critically acclaimed hits, binge-worthy dramas, and sci-fi sagas"
-        viewAllHref="/search?region=en"
+        viewAllHref="/american"
         icon={<Star className="size-5 text-blue-400 fill-blue-400/20" />}
         items={western}
       />

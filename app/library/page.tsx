@@ -55,7 +55,7 @@ export default function LibraryPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
+    <div className="mx-auto max-w-7xl space-y-5 sm:space-y-6 px-3.5 py-4 sm:px-6 sm:py-8">
       {/* Header with Title and Import/Export Tools */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/[0.08] pb-4">
         <div>
@@ -131,61 +131,64 @@ export default function LibraryPage() {
       {/* Library Grid */}
       {filtered.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-          {filtered.map((item) => (
-            <div
-              key={item.tmdb_id}
-              className="group relative flex flex-col overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 transition-all hover:-translate-y-1 hover:ring-rose-500/40"
-            >
-              <Link
-                href={`/series/${item.tmdb_id}?season=${item.season}&episode=${item.episode}`}
-                className="relative aspect-[2/3] w-full overflow-hidden bg-slate-900"
+          {filtered.map((item) => {
+            const itemId = item.id || item.tmdb_id || item.series_id || 0;
+            return (
+              <div
+                key={itemId}
+                className="group relative flex flex-col overflow-hidden rounded-2xl bg-white/[0.03] ring-1 ring-white/10 transition-all hover:-translate-y-1 hover:ring-rose-500/40"
               >
-                <Image
-                  src={item.poster}
-                  alt={item.title}
-                  fill
-                  className="object-cover transition group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                <Link
+                  href={`/series/${itemId}?season=${item.season}&episode=${item.episode}`}
+                  className="relative aspect-[2/3] w-full overflow-hidden bg-slate-900"
+                >
+                  <Image
+                    src={item.poster}
+                    alt={item.title}
+                    fill
+                    className="object-cover transition group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
 
-                <div className="absolute bottom-2.5 left-2.5 right-2.5">
-                  <div className="flex items-center gap-1.5 rounded-lg bg-rose-600/90 px-2 py-1 text-[11px] font-bold text-white shadow">
-                    <Play className="size-3 fill-white" />
-                    <span>
-                      S{item.season} • E{item.episode}
-                    </span>
+                  <div className="absolute bottom-2.5 left-2.5 right-2.5">
+                    <div className="flex items-center gap-1.5 rounded-lg bg-rose-600/90 px-2 py-1 text-[11px] font-bold text-white shadow">
+                      <Play className="size-3 fill-white" />
+                      <span>
+                        S{item.season} • E{item.episode}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Link>
-
-              {/* Remove button */}
-              <button
-                onClick={() => remove(item.tmdb_id)}
-                title="Remove from Library"
-                className="absolute right-2 top-2 rounded-lg bg-black/60 p-1.5 text-white/60 backdrop-blur-md transition hover:bg-rose-600 hover:text-white"
-              >
-                <Trash2 className="size-3.5" />
-              </button>
-
-              <div className="p-3">
-                <Link href={`/series/${item.tmdb_id}`}>
-                  <h3 className="line-clamp-1 text-xs font-bold text-white group-hover:text-rose-400">
-                    {item.title}
-                  </h3>
                 </Link>
-                {item.timestamp ? (
-                  <p className="mt-1 text-[10px] text-white/40">
-                    Bookmark: {Math.floor(item.timestamp / 60)}:
-                    {String(item.timestamp % 60).padStart(2, "0")}
-                  </p>
-                ) : (
-                  <p className="mt-1 text-[10px] text-white/40">
-                    {item.status.replace(/_/g, " ")}
-                  </p>
-                )}
+
+                {/* Remove button */}
+                <button
+                  onClick={() => remove(itemId)}
+                  title="Remove from Library"
+                  className="absolute right-2 top-2 rounded-lg bg-black/60 p-1.5 text-white/60 backdrop-blur-md transition hover:bg-rose-600 hover:text-white"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+
+                <div className="p-3">
+                  <Link href={`/series/${itemId}`}>
+                    <h3 className="line-clamp-1 text-xs font-bold text-white group-hover:text-rose-400">
+                      {item.title}
+                    </h3>
+                  </Link>
+                  {item.timestamp ? (
+                    <p className="mt-1 text-[10px] text-white/40">
+                      Bookmark: {Math.floor(item.timestamp / 60)}:
+                      {String(item.timestamp % 60).padStart(2, "0")}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-[10px] text-white/40">
+                      {item.status.replace(/_/g, " ")}
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-center">
