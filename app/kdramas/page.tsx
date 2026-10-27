@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { fetchTrendingKDramas } from "@/lib/series-api";
-import { SeriesCard } from "@/components/SeriesCard";
+import { fetchKDramasPaginated } from "@/lib/series-api";
+import { SeriesGridWithLoadMore } from "@/components/SeriesGridWithLoadMore";
 import { Tv } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function KDramasPage() {
-  const kdramas = await fetchTrendingKDramas();
+  const { items: initialKDramas } = await fetchKDramasPaginated(1, 18);
 
   return (
     <div className="mx-auto max-w-7xl px-3.5 py-6 sm:px-6 sm:py-10 space-y-6 sm:space-y-8">
@@ -28,11 +28,7 @@ export default async function KDramasPage() {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-        {kdramas.map((series, idx) => (
-          <SeriesCard key={series.id} series={series} priority={idx < 4} />
-        ))}
-      </div>
+      <SeriesGridWithLoadMore initialSeries={initialKDramas} type="kdrama" />
     </div>
   );
 }

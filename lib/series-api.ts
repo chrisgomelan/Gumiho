@@ -51,7 +51,7 @@ async function fetchTvMazeShowByName(name: string, forcedRegion?: "ko" | "en"): 
 }
 
 // ---------------------------------------------------------------------------
-// Verified Korean Dramas Only (K-Dramas)
+// 80+ Verified Top Korean Dramas (K-Dramas)
 // ---------------------------------------------------------------------------
 
 const POPULAR_KDRAMAS = [
@@ -79,10 +79,66 @@ const POPULAR_KDRAMAS = [
   "A Shop for Killers",
   "Strong Girl Bong-soon",
   "Weightlifting Fairy Kim Bok-Joo",
+  "Hometown Cha-Cha-Cha",
+  "While You Were Sleeping",
+  "What's Wrong with Secretary Kim",
+  "W: Two Worlds",
+  "Healer",
+  "Moon Lovers: Scarlet Heart Ryeo",
+  "It's Okay to Not Be Okay",
+  "The Legend of the Blue Sea",
+  "Pinocchio",
+  "My Love from the Star",
+  "Coffee Prince",
+  "Reply 1988",
+  "Mr. Sunshine",
+  "Prison Playbook",
+  "Beyond Evil",
+  "Mouse",
+  "Flower of Evil",
+  "Taxi Driver",
+  "Weak Hero Class 1",
+  "D.P.",
+  "Bloodhounds",
+  "Extracurricular",
+  "Juvenile Justice",
+  "Strangers from Hell",
+  "Happiness",
+  "Death's Game",
+  "Parasyte: The Grey",
+  "Lovely Runner",
+  "Hierarchy",
+  "Gyeongseong Creature",
+  "Daily Dose of Sunshine",
+  "Castaway Diva",
+  "Behind Your Touch",
+  "King the Land",
+  "See You in My 19th Life",
+  "Celebrity",
+  "The Good Bad Mother",
+  "Doctor Cha",
+  "Duty After School",
+  "The Worst of Evil",
+  "Twinkling Watermelon",
+  "A Killer Paradox",
+  "Pyramid Game",
+  "The 8 Show",
+  "Sweet Revenge",
+  "True Beauty",
+  "My Mister",
+  "Our Blues",
+  "Little Women",
+  "Reborn Rich",
+  "The Uncanny Counter",
+  "Start-Up",
+  "Doctor Romantic",
+  "Voice",
+  "Save Me",
+  "My Name"
 ];
 
 // ---------------------------------------------------------------------------
-// Verified American & Western Series Only
+// 80+ Verified Top American & Western Series
 // ---------------------------------------------------------------------------
 
 const POPULAR_WESTERN = [
@@ -110,30 +166,117 @@ const POPULAR_WESTERN = [
   "Dark",
   "Mindhunter",
   "Andor",
+  "The Sopranos",
+  "The Wire",
+  "Band of Brothers",
+  "Fleabag",
+  "Ted Lasso",
+  "Sherlock",
+  "Black Mirror",
+  "Westworld",
+  "The Mandalorian",
+  "Daredevil",
+  "The Witcher",
+  "Invincible",
+  "The Penguin",
+  "X-Men '97",
+  "Reacher",
+  "Slow Horses",
+  "Silo",
+  "Foundation",
+  "Only Murders in the Building",
+  "Euphoria",
+  "Rick and Morty",
+  "Dexter",
+  "Mad Men",
+  "The Crown",
+  "Homeland",
+  "Lost",
+  "Prison Break",
+  "Suits",
+  "The Office",
+  "Friends",
+  "Brooklyn Nine-Nine",
+  "Modern Family",
+  "Parks and Recreation",
+  "Schitt's Creek",
+  "Abbott Elementary",
+  "The Walking Dead",
+  "Supernatural",
+  "Hannibal",
+  "Boardwalk Empire",
+  "Narcos",
+  "Ozark",
+  "Vikings",
+  "Spartacus",
+  "Rome",
+  "Deadwood",
+  "Justified",
+  "The Americans",
+  "Banshee",
+  "Warrior",
+  "Gotham",
+  "The Flash",
+  "Arrow",
+  "Cobra Kai",
+  "Lucifer",
+  "The Umbrella Academy",
+  "1899"
 ];
 
-export async function fetchTrendingKDramas(): Promise<SeriesBase[]> {
+export async function fetchTrendingKDramas(limit = 18): Promise<SeriesBase[]> {
+  const slice = POPULAR_KDRAMAS.slice(0, limit);
   const results = await Promise.all(
-    POPULAR_KDRAMAS.map((title) => fetchTvMazeShowByName(title, "ko"))
+    slice.map((title) => fetchTvMazeShowByName(title, "ko"))
   );
   return results.filter((item): item is SeriesBase => item !== null && item.original_language === "ko");
 }
 
-export async function fetchTrendingWestern(): Promise<SeriesBase[]> {
+export async function fetchTrendingWestern(limit = 18): Promise<SeriesBase[]> {
+  const slice = POPULAR_WESTERN.slice(0, limit);
   const results = await Promise.all(
-    POPULAR_WESTERN.map((title) => fetchTvMazeShowByName(title, "en"))
+    slice.map((title) => fetchTvMazeShowByName(title, "en"))
   );
   return results.filter((item): item is SeriesBase => item !== null && item.original_language === "en");
 }
 
-export async function fetchTopRatedGlobal(): Promise<SeriesBase[]> {
+export async function fetchTopRatedGlobal(limit = 18): Promise<SeriesBase[]> {
   const [kdramas, western] = await Promise.all([
-    fetchTrendingKDramas(),
-    fetchTrendingWestern(),
+    fetchTrendingKDramas(12),
+    fetchTrendingWestern(12),
   ]);
   return [...western, ...kdramas].sort(
     (a, b) => b.vote_average - a.vote_average
+  ).slice(0, limit);
+}
+
+// Paginated fetchers for Load More functionality
+export async function fetchKDramasPaginated(
+  page = 1,
+  limit = 18
+): Promise<{ items: SeriesBase[]; hasMore: boolean; total: number }> {
+  const start = (page - 1) * limit;
+  const slice = POPULAR_KDRAMAS.slice(start, start + limit);
+  const results = await Promise.all(
+    slice.map((title) => fetchTvMazeShowByName(title, "ko"))
   );
+  const items = results.filter((item): item is SeriesBase => item !== null && item.original_language === "ko");
+  const hasMore = start + limit < POPULAR_KDRAMAS.length;
+  return { items, hasMore, total: POPULAR_KDRAMAS.length };
+}
+
+export async function fetchWesternPaginated(
+  page = 1,
+  limit = 18
+): Promise<{ items: SeriesBase[]; hasMore: boolean; total: number }> {
+  const start = (page - 1) * limit;
+  const slice = POPULAR_WESTERN.slice(start, start + limit);
+  const results = await Promise.all(
+    slice.map((title) => fetchTvMazeShowByName(title, "en"))
+  );
+  const items = results.filter((item): item is SeriesBase => item !== null && item.original_language === "en");
+  const hasMore = start + limit < POPULAR_WESTERN.length;
+  return { items, hasMore, total: POPULAR_WESTERN.length };
 }
 
 export async function searchSeries(
