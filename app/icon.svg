@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <defs>
+    <radialGradient id="gumihoBg" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#1c1224" />
+      <stop offset="100%" stop-color="#0b0c14" />
+    </radialGradient>
+    <linearGradient id="gumihoBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#e11d48" stop-opacity="0.4" />
+    </linearGradient>
+    <linearGradient id="gumihoFox" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="100%" stop-color="#e11d48" />
+    </linearGradient>
+    <linearGradient id="foxGlowFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="#be123c" stop-opacity="0.08" />
+    </linearGradient>
+    <filter id="pearlGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Circular Base Badge -->
+  <circle cx="16" cy="16" r="15" fill="url(#gumihoBg)" stroke="url(#gumihoBorder)" stroke-width="1.2" />
+
+  <!-- Fox Silhouette Group -->
+  <g transform="translate(16, 16) scale(1.08) translate(-12, -12.6)">
+    <!-- Head Outline and Soft Fill -->
+    <path
+      d="M3.5 4.5c.8 4.2-.2 8.2 2.8 11.8L12 21.5l5.7-5.2c3-3.6 2-7.6 2.8-11.8L15 9.5 12 7.5 9 9.5 3.5 4.5z"
+      fill="url(#foxGlowFill)"
+      stroke="url(#gumihoFox)"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+
+    <!-- Inner Ear Accents -->
+    <path d="M6.8 7.8l2 3" stroke="#fda4af" stroke-width="1.5" stroke-linecap="round" />
+    <path d="M17.2 7.8l-2 3" stroke="#fda4af" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- Fox Eyes -->
+    <path d="M7.8 13.5c1.2-.7 2.2-.2 2.8.3" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" />
+    <path d="M16.2 13.5c-1.2-.7-2.2-.2-2.8.3" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round" />
+
+    <!-- Mystical Pearl (Yeowoo-guseul) with Glow -->
+    <circle cx="12" cy="11.5" r="1.3" fill="#ffffff" filter="url(#pearlGlow)" />
+
+    <!-- Snout Accent -->
+    <path d="M11.2 18h1.6" stroke="#fb7185" stroke-width="1.5" stroke-linecap="round" />
+  </g>
+</svg>

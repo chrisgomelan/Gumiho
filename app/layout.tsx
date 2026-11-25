@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: "Gumiho — Stream American Series & Korean Dramas",
   description:
     "Free streaming dashboard for American series, K-Dramas, and global shows with multi-server playback and local-first progress tracking.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
