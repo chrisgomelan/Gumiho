@@ -10,6 +10,8 @@ import {
   ExternalLink,
   Info,
   Server,
+  ShieldAlert,
+  ShieldCheck,
   Tv,
 } from "lucide-react";
 
@@ -20,12 +22,30 @@ export interface VideoServer {
   getUrl: (id: number, imdbId: string | null | undefined, season: number, episode: number) => string;
 }
 
-// Only verified, actively responding and accessible free embed streaming servers
+// Verified, actively responding free embed streaming servers ordered by lowest ad intrusion
 export const VIDEO_SERVERS: VideoServer[] = [
+  {
+    id: "vidlink",
+    name: "VidLink (Ad-Free)",
+    badge: "No Popups ★",
+    getUrl: (id, imdbId, s, ep) => {
+      const mediaId = imdbId || id;
+      return `https://vidlink.pro/tv/${mediaId}/${s}/${ep}?primaryColor=f43f5e&secondaryColor=0b0c14&iconColor=fb7185&autoplay=false`;
+    },
+  },
+  {
+    id: "vidsrc-cc",
+    name: "VidSrc CC (Clean)",
+    badge: "Fast HD",
+    getUrl: (id, imdbId, s, ep) => {
+      const mediaId = imdbId || id;
+      return `https://vidsrc.cc/v2/embed/tv/${mediaId}/${s}/${ep}`;
+    },
+  },
   {
     id: "multiembed",
     name: "MultiEmbed Stream",
-    badge: "Recommended",
+    badge: "Multi-Source",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
       return `https://multiembed.mov/?video_id=${mediaId}&s=${s}&e=${ep}`;
@@ -55,7 +75,7 @@ export const VIDEO_SERVERS: VideoServer[] = [
     badge: "Active",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
-      return `https://autoembed.me/tv/imdb/${mediaId}-${s}-${ep}`;
+      return `https://player.autoembed.cc/embed/tv/${mediaId}/${s}/${ep}`;
     },
   },
   {
@@ -70,7 +90,7 @@ export const VIDEO_SERVERS: VideoServer[] = [
   {
     id: "smashystream",
     name: "Smashy Player",
-    badge: "Multi-Source",
+    badge: "Backup 2",
     getUrl: (id, imdbId, s, ep) => {
       const mediaId = imdbId || id;
       return `https://player.smashystream.com/tv/${mediaId}/${s}/${ep}`;
@@ -112,6 +132,7 @@ export function WatchPlayer({
   const [selectedSeason, setSelectedSeason] = useState(initialSeason);
   const [selectedEpisode, setSelectedEpisode] = useState(initialEpisode);
   const [serverDropdownOpen, setServerDropdownOpen] = useState(false);
+  const [adShield, setAdShield] = useState(true);
 
   // Time bookmark input states
   const [minutesInput, setMinutesInput] = useState("");
@@ -188,9 +209,9 @@ export function WatchPlayer({
 
   return (
     <div className="flex flex-col gap-3.5 sm:gap-4">
-      {/* Top Controls: Server Selector & Quick Info */}
+      {/* Top Controls: Server Selector, Ad Shield & Quick Info */}
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Server Selector Dropdown */}
           <div className="relative">
             <button
@@ -240,6 +261,29 @@ export function WatchPlayer({
               </div>
             )}
           </div>
+
+          {/* Ad Shield Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setAdShield((prev) => !prev)}
+            title={
+              adShield
+                ? "Ad Shield is ACTIVE: Popups, click hijackers and redirects are blocked"
+                : "Ad Shield is OFF: Click to re-enable ad and popup blocking"
+            }
+            className={`flex h-10 sm:h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-semibold shadow-sm transition active:scale-95 ${
+              adShield
+                ? "bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30 hover:bg-emerald-500/25"
+                : "bg-white/[0.08] text-white/50 ring-1 ring-white/10 hover:bg-white/[0.12] hover:text-white"
+            }`}
+          >
+            {adShield ? (
+              <ShieldCheck className="size-3.5 text-emerald-400 shrink-0" />
+            ) : (
+              <ShieldAlert className="size-3.5 text-amber-400 shrink-0" />
+            )}
+            <span>{adShield ? "Ad Shield: ON" : "Ad Shield: OFF"}</span>
+          </button>
         </div>
 
         {/* External Link */}
@@ -257,12 +301,18 @@ export function WatchPlayer({
       {/* Responsive Video Player Iframe */}
       <div className="relative aspect-video w-full overflow-hidden rounded-xl sm:rounded-2xl bg-black shadow-2xl ring-1 ring-white/10">
         <iframe
-          key={`${activeServer.id}-s${selectedSeason}-e${selectedEpisode}`}
+          key={`${activeServer.id}-s${selectedSeason}-e${selectedEpisode}-${adShield ? "shield-on" : "shield-off"}`}
           src={playerUrl}
           title={`${title} S${selectedSeason} E${selectedEpisode}`}
           className="h-full w-full border-0"
+          sandbox={
+            adShield
+              ? "allow-scripts allow-same-origin allow-forms allow-presentation"
+              : "allow-scripts allow-same-origin allow-forms allow-presentation allow-popups allow-popups-to-escape-sandbox"
+          }
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
           allowFullScreen
+          referrerPolicy="origin"
         />
       </div>
 
@@ -297,10 +347,10 @@ export function WatchPlayer({
       </div>
 
       {/* Troubleshooting Tips */}
-      <div className="flex items-start gap-2 rounded-xl bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200/90 ring-1 ring-amber-500/20">
-        <Info className="size-3.5 shrink-0 text-amber-400 mt-0.5" />
+      <div className="flex items-start gap-2 rounded-xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200/90 ring-1 ring-emerald-500/20">
+        <ShieldCheck className="size-3.5 shrink-0 text-emerald-400 mt-0.5" />
         <span>
-          <strong>Streaming Tip:</strong> If video won&apos;t load or buffers, tap the server button above or tap <strong>Open in Tab</strong>. On mobile, disable adblocker if playback is blocked.
+          <strong>Ad-Free Protection Active:</strong> Popups, redirects, and click hijackers from the embedded stream are blocked. If a player ever shows a blank screen, try another server from the list or toggle the Ad Shield off.
         </span>
       </div>
 
